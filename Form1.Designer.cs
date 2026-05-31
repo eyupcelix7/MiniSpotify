@@ -34,6 +34,7 @@
             button1 = new Button();
             button2 = new Button();
             button3 = new Button();
+            button4 = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
@@ -77,9 +78,9 @@
             button1.FlatAppearance.BorderColor = Color.DimGray;
             button1.FlatStyle = FlatStyle.Flat;
             button1.ForeColor = Color.WhiteSmoke;
-            button1.Location = new Point(288, 33);
+            button1.Location = new Point(322, 50);
             button1.Name = "button1";
-            button1.Size = new Size(45, 45);
+            button1.Size = new Size(30, 30);
             button1.TabIndex = 3;
             button1.UseVisualStyleBackColor = true;
             // 
@@ -90,9 +91,9 @@
             button2.FlatAppearance.BorderColor = Color.DimGray;
             button2.FlatStyle = FlatStyle.Flat;
             button2.ForeColor = Color.WhiteSmoke;
-            button2.Location = new Point(238, 33);
+            button2.Location = new Point(288, 50);
             button2.Name = "button2";
-            button2.Size = new Size(45, 45);
+            button2.Size = new Size(30, 30);
             button2.TabIndex = 4;
             button2.UseVisualStyleBackColor = true;
             // 
@@ -103,11 +104,24 @@
             button3.FlatAppearance.BorderColor = Color.DimGray;
             button3.FlatStyle = FlatStyle.Flat;
             button3.ForeColor = Color.WhiteSmoke;
-            button3.Location = new Point(338, 33);
+            button3.Location = new Point(356, 50);
             button3.Name = "button3";
-            button3.Size = new Size(45, 45);
+            button3.Size = new Size(30, 30);
             button3.TabIndex = 5;
             button3.UseVisualStyleBackColor = true;
+            // 
+            // button4
+            // 
+            button4.BackgroundImage = Properties.Resources.music;
+            button4.BackgroundImageLayout = ImageLayout.Center;
+            button4.FlatAppearance.BorderColor = Color.DimGray;
+            button4.FlatStyle = FlatStyle.Flat;
+            button4.ForeColor = Color.WhiteSmoke;
+            button4.Location = new Point(254, 50);
+            button4.Name = "button4";
+            button4.Size = new Size(30, 30);
+            button4.TabIndex = 6;
+            button4.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -116,6 +130,7 @@
             BackColor = SystemColors.Desktop;
             BackgroundImageLayout = ImageLayout.Zoom;
             ClientSize = new Size(390, 85);
+            Controls.Add(button4);
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(pictureBox1);
@@ -141,5 +156,6 @@
         private Button button1;
         private Button button2;
         private Button button3;
+        private Button button4;
     }
 }
