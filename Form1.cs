@@ -11,5 +11,10 @@ namespace MiniSpotify
         private void Form1_Load(object sender, EventArgs e)
         {
         }
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            Win32.SetRoundedCorner(Handle);
+        }
     }
 }
