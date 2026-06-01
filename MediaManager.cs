@@ -28,18 +28,25 @@ namespace MiniSpotify
                 Application.Exit();
                 return;
             }
-            if(!_manager.GetSessions().Any(x=> x.SourceAppUserModelId.Contains("Spotify.exe")))
+            var spotifySession = _manager.GetSessions()
+                .FirstOrDefault(x => x.SourceAppUserModelId.Contains("Spotify.exe")); // Spotify oturumunu seçer
+            if (spotifySession == null)
             {
                 MessageBox.Show("Lütfen Spotifyı Açın.");
                 Application.Exit();
                 return;
             }
-            await AttachToSession(_manager.GetCurrentSession());
+            await AttachToSession(spotifySession); // Doğru oturuma bağlanır
         }
         public async Task AttachToSession(GlobalSystemMediaTransportControlsSession? session)
         {
+            if (_currentSession != null)
+            {
+                _currentSession.MediaPropertiesChanged -= OnMediaPropertiesChanged; // Eski aboneliği temizler
+                _currentSession.PlaybackInfoChanged -= OnPlaybackInfoChanged; // Eski aboneliği temizler
+            }
             _currentSession = session;
-            if(_currentSession != null)
+            if (_currentSession != null)
             {
                 _currentSession.MediaPropertiesChanged += OnMediaPropertiesChanged;
                 _currentSession.PlaybackInfoChanged += OnPlaybackInfoChanged;
@@ -50,17 +57,18 @@ namespace MiniSpotify
 
             await NotifyMediaChanged();
         }
-        public async void OnMediaPropertiesChanged(GlobalSystemMediaTransportControlsSession sender, MediaPropertiesChangedEventArgs args)
+        public void OnMediaPropertiesChanged(GlobalSystemMediaTransportControlsSession sender, MediaPropertiesChangedEventArgs args)
         {
-            await NotifyMediaChanged();
+            _ = NotifyMediaChanged();
         }
-        private async void OnPlaybackInfoChanged(GlobalSystemMediaTransportControlsSession sender,PlaybackInfoChangedEventArgs args)
+        private void OnPlaybackInfoChanged(GlobalSystemMediaTransportControlsSession sender,PlaybackInfoChangedEventArgs args)
         {
-            await NotifyMediaChanged();
+            _ = NotifyMediaChanged();
         }
         public async Task NotifyMediaChanged()
         {
             var session = _currentSession;
+            if (session == null) return;
             var playbackInfo = session.GetPlaybackInfo();
             var props = await session.TryGetMediaPropertiesAsync();
             if (props == null) return;
@@ -79,17 +87,15 @@ namespace MiniSpotify
         public async Task TogglePlayPause()
         {
             var session = _currentSession;
+            if (session == null) return;
             //await NotifyMediaChanged();
             await session.TryTogglePlayPauseAsync();
         }
-        public async Task<bool> IsPlaying()
+        public Task<bool> IsPlaying()
         {
-            var session = _currentSession;
-            var status = _currentSession!.GetPlaybackInfo().PlaybackStatus;
-            if (status == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
-                return true;
-            else
-                return false;
+            var status = _currentSession?.GetPlaybackInfo().PlaybackStatus;
+            var isPlaying = status == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+            return Task.FromResult(isPlaying);
         }
         public async Task Next()
         {
@@ -127,6 +133,7 @@ namespace MiniSpotify
             if (_currentSession != null)
             {
                 _currentSession.MediaPropertiesChanged -= OnMediaPropertiesChanged;
+                _currentSession.PlaybackInfoChanged -= OnPlaybackInfoChanged;
             }
         }
     }

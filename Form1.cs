@@ -5,18 +5,21 @@ using SpotifyAPI.Web.Auth;
 using System.Net.Http.Headers;
 using System.Reflection;
 using Timer = System.Windows.Forms.Timer;
+using System.Drawing.Imaging;
+
 namespace MiniSpotify
 {
     public partial class Form1 : Form
     {
         private static EmbedIOAuthServer? _server;
         private static SpotifyClient? _spotify;
-        private static string clientId = "CLIENT_ID";
-        private static string clientSecret = "CLIENT_SECRET";
+        private static string clientId = "CLIENT_ID"; // spotify geliştirici hesabından alacaksınız.
+        private static string clientSecret = "CLIENT_SECRET"; // spotify geliştirici hesabından alacaksınız.
         private string? accessToken;
         private AuthorizationCodeTokenResponse? token;
         private MediaManager _mediaManager;
-        private HttpClient _client;
+        private readonly HttpClient _client = new();
+        private const string TokenPath = "D://C#/MiniSpotify/token.txt";
         private bool _isPlaying;
         // --- Animasyon için ---
         private double _opacity = 0;
@@ -66,12 +69,11 @@ namespace MiniSpotify
             TopMost = true;
             ShowInTaskbar = false;
             likeBtn.BackgroundImage = Resources.heartWhite;
-            _client = new HttpClient();
             CheckTogglePlayBtn();
             SetTooltips();
             try
             {
-                var refreshToken = File.ReadAllText("D://C#/MiniSpotify/token.txt");
+                var refreshToken = File.ReadAllText(TokenPath); // Sabit yolu tekrar kullanır
 
                 var newToken = await new OAuthClient().RequestToken(
                     new AuthorizationCodeRefreshRequest(
@@ -104,9 +106,12 @@ namespace MiniSpotify
                 try
                 {
                     using var ms = new MemoryStream(info.ThumbnailBytes);
-                    var oldImage = pctBoxImage.BackgroundImage;
-                    pctBoxImage.BackgroundImage = System.Drawing.Image.FromStream(ms);
-                    oldImage?.Dispose();
+                    var old = pctBoxImage.BackgroundImage;
+
+                    pctBoxImage.BackgroundImage =
+                        System.Drawing.Image.FromStream(ms);
+
+                    old?.Dispose();
                 }
                 catch { pctBoxImage.Image = AlbumArtHelper.DefaultArt; }
             }
@@ -124,7 +129,6 @@ namespace MiniSpotify
         }
         public static async Task NewLogin()
         {
-            // Make sure "http://127.0.0.1:5000/callback" is in your spotify application as redirect uri!
             _server = new EmbedIOAuthServer(new Uri("http://127.0.0.1:5000/callback"), 5000);
             await _server.Start();
 
@@ -157,7 +161,7 @@ namespace MiniSpotify
             );
 
             _spotify = new SpotifyClient(tokenResponse.AccessToken);
-            await File.WriteAllTextAsync("D://C#/MiniSpotify/token.txt", tokenResponse.RefreshToken);
+                await File.WriteAllTextAsync(TokenPath, tokenResponse.RefreshToken);
         }
         protected override void OnHandleCreated(EventArgs e)
         {
@@ -166,14 +170,14 @@ namespace MiniSpotify
         }
         private async void likeBtn_Click(object sender, EventArgs e)
         {
+            if (_spotify == null || string.IsNullOrEmpty(accessToken)) return;
             try
             {
                 var current = await _spotify!.Player.GetCurrentPlayback();
                 if (current?.Item is not FullTrack track)
                     return;
-                _client = new HttpClient();
                 _client.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", accessToken);
+                    new AuthenticationHeaderValue("Bearer", accessToken); // Mevcut token
                 var uri = $"https://api.spotify.com/v1/me/library?uris=spotify:track:{track.Id}";
                 var response = await _client.PutAsync(uri, null);
                 var body = await response.Content.ReadAsStringAsync();
@@ -215,7 +219,7 @@ namespace MiniSpotify
             toolTipLike.SetToolTip(likeBtn, "Beğen");
             toolTipPrev.SetToolTip(prevBtn, "Önceki");
             toolTipNext.SetToolTip(nextBtn, "Sonraki");
-            toolTipNext.SetToolTip(togglePlayBtn, "Durdur / Çal");
+            toolTipPlayToggle.SetToolTip(togglePlayBtn, "Durdur / Çal");
         }
         private void ShowPopup()
         {
@@ -293,6 +297,7 @@ namespace MiniSpotify
         private void ClearDisposes()
         {
             _trayIcon?.Dispose();
+            _client?.Dispose();
             _mediaManager.Dispose();
             this.Close();
             this.Dispose();
