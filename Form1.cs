@@ -11,8 +11,8 @@ namespace MiniSpotify
     {
         private static EmbedIOAuthServer? _server;
         private static SpotifyClient? _spotify;
-        private static string clientId = "35e3a33ec429452bb9bed1795addf566";
-        private static string clientSecret = "8331fc3ebd7e45c48898c1b298e3a1c7";
+        private static string clientId = "CLIENT_ID";
+        private static string clientSecret = "CLIENT_SECRET";
         private string? accessToken;
         private AuthorizationCodeTokenResponse? token;
         private MediaManager _mediaManager;
@@ -34,7 +34,7 @@ namespace MiniSpotify
             _fadeTimer = new System.Windows.Forms.Timer { Interval = 16 }; // 60fps
             _fadeTimer.Tick += OnFadeTick;
 
-            _displayTimer = new System.Windows.Forms.Timer { Interval = 3000 };
+            _displayTimer = new System.Windows.Forms.Timer { Interval = 5000 };
             _displayTimer.Tick += OnDisplayTimerTick;
 
             // NotifyICon
@@ -65,7 +65,7 @@ namespace MiniSpotify
             DoubleBuffered = true; // Titreşimi önlemek için
             TopMost = true;
             ShowInTaskbar = false;
-            likeBtn.BackgroundImage = Resources.music;
+            likeBtn.BackgroundImage = Resources.heartWhite;
             _client = new HttpClient();
             CheckTogglePlayBtn();
             SetTooltips();
@@ -118,7 +118,7 @@ namespace MiniSpotify
                 _isPlaying = true;
             else
                 _isPlaying = false;
-            
+            likeBtn.BackgroundImage = Resources.heartWhite;
             CheckTogglePlayBtn();
             ShowPopup();
         }
@@ -177,7 +177,7 @@ namespace MiniSpotify
                 var uri = $"https://api.spotify.com/v1/me/library?uris=spotify:track:{track.Id}";
                 var response = await _client.PutAsync(uri, null);
                 var body = await response.Content.ReadAsStringAsync();
-                likeBtn.BackgroundImage = Resources.musicLoveFix;
+                likeBtn.BackgroundImage = Resources.heart;
             }
             catch (APIException ex)
             {

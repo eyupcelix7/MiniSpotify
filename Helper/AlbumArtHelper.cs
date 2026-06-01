@@ -10,15 +10,6 @@ namespace MiniSpotify.Helper
 {
     public static class AlbumArtHelper
     {
-        /// <summary>Albüm kapak byte'larının başlık+sanatçı anahtarıyla saklandığı önbellek.</summary>
-        private static readonly ConcurrentDictionary<string, byte[]> _byteCache = new();
-
-        /// <summary>LRU sırasını takip eden anahtar listesi.</summary>
-        private static readonly List<string> _cacheKeys = new();
-
-        /// <summary>Önbelleğe thread-safe erişim için kilit.</summary>
-        private static readonly object _cacheLock = new();
-
         /// <summary>Lazy yüklenen varsayılan kapak resmi.</summary>
         private static Image? _defaultArt;
         /// <summary>
@@ -42,14 +33,9 @@ namespace MiniSpotify.Helper
         /// <param name="thumbnail">WinRT thumbnail stream referansı.</param>
         /// <param name="ct">İptal token'ı.</param>
         /// <returns>Byte dizisi olarak kapak resmi, yoksa null.</returns>
-        public static async Task<byte[]?> GetThumbnailBytesAsync(string? title, string? artist,
-            IRandomAccessStreamReference? thumbnail, CancellationToken ct = default)
+        public static async Task<byte[]?> GetThumbnailBytesAsync(IRandomAccessStreamReference? thumbnail, CancellationToken ct = default)
         {
             if (thumbnail == null) return null;
-
-            var cacheKey = $"{title}|{artist}";
-            if (_byteCache.TryGetValue(cacheKey, out var cachedBytes))
-                return cachedBytes;
 
             try
             {
@@ -59,7 +45,6 @@ namespace MiniSpotify.Helper
                 await winRtStream.CopyToAsync(ms, ct);
                 var bytes = ms.ToArray();
 
-                AddToCache(cacheKey, bytes);
                 return bytes;
             }
             catch
@@ -67,26 +52,6 @@ namespace MiniSpotify.Helper
                 return null;
             }
         }
-
-        /// <summary>
-        /// Byte dizisini LRU önbelleğe ekler. Kapasite aşılırsa en eski kaydı siler.
-        /// </summary>
-        private static void AddToCache(string key, byte[] bytes)
-        {
-            lock (_cacheLock)
-            {
-                if (_byteCache.ContainsKey(key)) return;
-                while (_cacheKeys.Count >= 10)
-                {
-                    var oldest = _cacheKeys[0];
-                    _cacheKeys.RemoveAt(0);
-                    _byteCache.TryRemove(oldest, out _);
-                }
-                _byteCache[key] = bytes;
-                _cacheKeys.Add(key);
-            }
-        }
-
         /// <summary>
         /// Kapak resmi bulunamadığında gösterilecek varsayılan ♫ resmini oluşturur.
         /// 128x128 koyu gri arka plan üzerinde büyük nota sembolü.

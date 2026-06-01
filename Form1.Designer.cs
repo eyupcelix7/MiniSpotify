@@ -119,7 +119,7 @@
             // 
             // likeBtn
             // 
-            likeBtn.BackgroundImage = Properties.Resources.musicLoveFix;
+            likeBtn.BackgroundImage = Properties.Resources.heartWhite;
             likeBtn.BackgroundImageLayout = ImageLayout.Center;
             likeBtn.Cursor = Cursors.Hand;
             likeBtn.FlatAppearance.BorderColor = Color.DimGray;

@@ -54,20 +54,17 @@ namespace MiniSpotify
         {
             await NotifyMediaChanged();
         }
-        private async void OnPlaybackInfoChanged(
-    GlobalSystemMediaTransportControlsSession sender,
-    PlaybackInfoChangedEventArgs args)
+        private async void OnPlaybackInfoChanged(GlobalSystemMediaTransportControlsSession sender,PlaybackInfoChangedEventArgs args)
         {
             await NotifyMediaChanged();
         }
-
         public async Task NotifyMediaChanged()
         {
             var session = _currentSession;
             var playbackInfo = session.GetPlaybackInfo();
             var props = await session.TryGetMediaPropertiesAsync();
             if (props == null) return;
-            var thumbnailBytes = await AlbumArtHelper.GetThumbnailBytesAsync(props.Title, props.Artist, props.Thumbnail);
+            var thumbnailBytes = await AlbumArtHelper.GetThumbnailBytesAsync(props.Thumbnail);
             var mediaInfo = new MediaInfo
             (
                 Title: props.Title ?? "Bulunamadı",
