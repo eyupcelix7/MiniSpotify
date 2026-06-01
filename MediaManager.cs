@@ -34,19 +34,22 @@ namespace MiniSpotify
                 Application.Exit();
                 return;
             }
-            AttachToSession(_manager.GetCurrentSession());
+            await AttachToSession(_manager.GetCurrentSession());
         }
-
         public async Task AttachToSession(GlobalSystemMediaTransportControlsSession? session)
         {
+            _currentSession = session;
             if(_currentSession != null)
             {
-                //_currentSession.MediaPropertiesChanged -= OnMediakk
+                _currentSession.MediaPropertiesChanged += OnMediaPropertiesChanged;
             }
-            _currentSession = session;
             //var x = _currentSession.GetPlaybackInfo();
             //var dd = await _currentSession.TryGetMediaPropertiesAsync();
 
+            await NotifyMediaChanged();
+        }
+        public async void OnMediaPropertiesChanged(GlobalSystemMediaTransportControlsSession sender, MediaPropertiesChangedEventArgs args)
+        {
             await NotifyMediaChanged();
         }
         public async Task NotifyMediaChanged()
@@ -66,6 +69,48 @@ namespace MiniSpotify
                 Session: session
             );
             MediaChanged?.Invoke(mediaInfo);
+        }
+        public async Task TogglePlayPause()
+        {
+            var session = _currentSession;
+            await session.TryTogglePlayPauseAsync();
+        }
+        public async Task<bool> IsPlaying()
+        {
+            var session = _currentSession;
+            var status = _currentSession!.GetPlaybackInfo().PlaybackStatus;
+            if (status == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
+                return true;
+            else
+                return false;
+        }
+        public async Task Next()
+        {
+            var session = _currentSession;
+            if (session == null)
+                return;
+            try
+            {
+                await session.TrySkipNextAsync();
+            }
+            catch (Exception)
+            {
+            }
+        }
+        public async Task Previous()
+        {
+            var session = _currentSession;
+            if (session == null)
+                return;
+            try
+            {
+                await session.TrySkipPreviousAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
         public void Dispose()
         {

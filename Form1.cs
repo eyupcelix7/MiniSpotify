@@ -16,10 +16,10 @@ namespace MiniSpotify
         private static string clientSecret = "8331fc3ebd7e45c48898c1b298e3a1c7";
 
         private string? accessToken;
-        private string? refreshToken;
         private AuthorizationCodeTokenResponse? token;
         private MediaManager _mediaManager;
         private HttpClient _client;
+        private bool _isPlaying;
         public Form1()
         {
             var syncContext = new WindowsFormsSynchronizationContext();
@@ -27,6 +27,38 @@ namespace MiniSpotify
             this.CreateControl();
             InitializeComponent();
             Location = new Point(Screen.PrimaryScreen!.WorkingArea.Right - 390, 15);
+            _mediaManager = new MediaManager();
+        }
+        private async void Form1_Load(object sender, EventArgs e)
+        {
+            _mediaManager.MediaChanged += OnMediaChanged;
+            await _mediaManager.Start();
+            _isPlaying = await _mediaManager.IsPlaying();
+            TopMost = true;
+            ShowInTaskbar = false;
+            likeBtn.BackgroundImage = Resources.music;
+            _client = new HttpClient();
+            checkTogglePlayBtn();
+            try
+            {
+                var refreshToken = File.ReadAllText("D://C#/MiniSpotify/token.txt");
+
+                var newToken = await new OAuthClient().RequestToken(
+                    new AuthorizationCodeRefreshRequest(
+                        clientId,
+                        clientSecret,
+                        refreshToken
+                    )
+                );
+                accessToken = newToken.AccessToken;
+                _spotify = new SpotifyClient(newToken.AccessToken);
+                var profile = await _spotify.UserProfile.Current();
+                //MessageBox.Show(profile.DisplayName);
+            }
+            catch (Exception)
+            {
+                await NewLogin();
+            }
         }
         private void OnMediaChanged(MediaInfo info)
         {
@@ -51,36 +83,6 @@ namespace MiniSpotify
             else
             {
                 pictureBox1.Image = AlbumArtHelper.DefaultArt;
-            }
-        }
-        private async void Form1_Load(object sender, EventArgs e)
-        {
-            TopMost = true;
-            ShowInTaskbar = false;
-            likeBtn.BackgroundImage = Resources.music;
-            _client = new HttpClient();
-            _mediaManager = new MediaManager();
-            await _mediaManager.Start();
-            _mediaManager.MediaChanged += OnMediaChanged;
-            try
-            {
-                var refreshToken = File.ReadAllText("D://C#/MiniSpotify/token.txt");
-
-                var newToken = await new OAuthClient().RequestToken(
-                    new AuthorizationCodeRefreshRequest(
-                        clientId,
-                        clientSecret,
-                        refreshToken
-                    )
-                );
-                accessToken = newToken.AccessToken;
-                _spotify = new SpotifyClient(newToken.AccessToken);
-                var profile = await _spotify.UserProfile.Current();
-                //MessageBox.Show(profile.DisplayName);
-            }
-            catch (Exception)
-            {
-                await NewLogin();
             }
         }
         public static async Task NewLogin()
@@ -144,6 +146,27 @@ namespace MiniSpotify
             {
                 MessageBox.Show(ex.Message + "\n" + ex.Response?.StatusCode);
             }
+        }
+        private async void togglePlayBtn_Click(object sender, EventArgs e)
+        {
+            _isPlaying = !_isPlaying;
+            checkTogglePlayBtn();
+            await _mediaManager.TogglePlayPause();
+        }
+        private void checkTogglePlayBtn()
+        {
+            if (_isPlaying)
+                togglePlayBtn.BackgroundImage = Resources.stop;
+            else
+                togglePlayBtn.BackgroundImage = Resources.start;
+        }
+        private async void prevBtn_Click(object sender, EventArgs e)
+        {
+            await _mediaManager.Previous();
+        }
+        private async void nextBtn_Click(object sender, EventArgs e)
+        {
+            await _mediaManager.Next();
         }
     }
 }

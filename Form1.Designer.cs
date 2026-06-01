@@ -31,9 +31,9 @@
             pictureBox1 = new PictureBox();
             label1 = new Label();
             label2 = new Label();
-            button1 = new Button();
-            button2 = new Button();
-            button3 = new Button();
+            togglePlayBtn = new Button();
+            prevBtn = new Button();
+            nextBtn = new Button();
             likeBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
@@ -71,44 +71,47 @@
             label2.TabIndex = 2;
             label2.Text = "Organize";
             // 
-            // button1
+            // togglePlayBtn
             // 
-            button1.BackgroundImage = Properties.Resources.start;
-            button1.BackgroundImageLayout = ImageLayout.Center;
-            button1.FlatAppearance.BorderColor = Color.DimGray;
-            button1.FlatStyle = FlatStyle.Flat;
-            button1.ForeColor = Color.WhiteSmoke;
-            button1.Location = new Point(322, 50);
-            button1.Name = "button1";
-            button1.Size = new Size(30, 30);
-            button1.TabIndex = 3;
-            button1.UseVisualStyleBackColor = true;
+            togglePlayBtn.BackgroundImage = Properties.Resources.stop;
+            togglePlayBtn.BackgroundImageLayout = ImageLayout.Center;
+            togglePlayBtn.FlatAppearance.BorderColor = Color.DimGray;
+            togglePlayBtn.FlatStyle = FlatStyle.Flat;
+            togglePlayBtn.ForeColor = Color.WhiteSmoke;
+            togglePlayBtn.Location = new Point(322, 50);
+            togglePlayBtn.Name = "togglePlayBtn";
+            togglePlayBtn.Size = new Size(30, 30);
+            togglePlayBtn.TabIndex = 3;
+            togglePlayBtn.UseVisualStyleBackColor = true;
+            togglePlayBtn.Click += togglePlayBtn_Click;
             // 
-            // button2
+            // prevBtn
             // 
-            button2.BackgroundImage = Properties.Resources.prev;
-            button2.BackgroundImageLayout = ImageLayout.Center;
-            button2.FlatAppearance.BorderColor = Color.DimGray;
-            button2.FlatStyle = FlatStyle.Flat;
-            button2.ForeColor = Color.WhiteSmoke;
-            button2.Location = new Point(288, 50);
-            button2.Name = "button2";
-            button2.Size = new Size(30, 30);
-            button2.TabIndex = 4;
-            button2.UseVisualStyleBackColor = true;
+            prevBtn.BackgroundImage = Properties.Resources.prev;
+            prevBtn.BackgroundImageLayout = ImageLayout.Center;
+            prevBtn.FlatAppearance.BorderColor = Color.DimGray;
+            prevBtn.FlatStyle = FlatStyle.Flat;
+            prevBtn.ForeColor = Color.WhiteSmoke;
+            prevBtn.Location = new Point(288, 50);
+            prevBtn.Name = "prevBtn";
+            prevBtn.Size = new Size(30, 30);
+            prevBtn.TabIndex = 4;
+            prevBtn.UseVisualStyleBackColor = true;
+            prevBtn.Click += prevBtn_Click;
             // 
-            // button3
+            // nextBtn
             // 
-            button3.BackgroundImage = Properties.Resources.next;
-            button3.BackgroundImageLayout = ImageLayout.Center;
-            button3.FlatAppearance.BorderColor = Color.DimGray;
-            button3.FlatStyle = FlatStyle.Flat;
-            button3.ForeColor = Color.WhiteSmoke;
-            button3.Location = new Point(356, 50);
-            button3.Name = "button3";
-            button3.Size = new Size(30, 30);
-            button3.TabIndex = 5;
-            button3.UseVisualStyleBackColor = true;
+            nextBtn.BackgroundImage = Properties.Resources.next;
+            nextBtn.BackgroundImageLayout = ImageLayout.Center;
+            nextBtn.FlatAppearance.BorderColor = Color.DimGray;
+            nextBtn.FlatStyle = FlatStyle.Flat;
+            nextBtn.ForeColor = Color.WhiteSmoke;
+            nextBtn.Location = new Point(356, 50);
+            nextBtn.Name = "nextBtn";
+            nextBtn.Size = new Size(30, 30);
+            nextBtn.TabIndex = 5;
+            nextBtn.UseVisualStyleBackColor = true;
+            nextBtn.Click += nextBtn_Click;
             // 
             // likeBtn
             // 
@@ -135,9 +138,9 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(pictureBox1);
-            Controls.Add(button3);
-            Controls.Add(button2);
-            Controls.Add(button1);
+            Controls.Add(nextBtn);
+            Controls.Add(prevBtn);
+            Controls.Add(togglePlayBtn);
             FormBorderStyle = FormBorderStyle.None;
             Name = "Form1";
             StartPosition = FormStartPosition.Manual;
@@ -154,9 +157,9 @@
         private PictureBox pictureBox1;
         private Label label1;
         private Label label2;
-        private Button button1;
-        private Button button2;
-        private Button button3;
+        private Button togglePlayBtn;
+        private Button prevBtn;
+        private Button nextBtn;
         private Button likeBtn;
     }
 }
