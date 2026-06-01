@@ -42,6 +42,7 @@
             // 
             pictureBox1.BackgroundImage = Properties.Resources._0x1900_000000_80_0_0;
             pictureBox1.BackgroundImageLayout = ImageLayout.Zoom;
+            pictureBox1.Cursor = Cursors.Hand;
             pictureBox1.ImageLocation = "";
             pictureBox1.Location = new Point(8, 9);
             pictureBox1.Name = "pictureBox1";
@@ -75,6 +76,7 @@
             // 
             togglePlayBtn.BackgroundImage = Properties.Resources.stop;
             togglePlayBtn.BackgroundImageLayout = ImageLayout.Center;
+            togglePlayBtn.Cursor = Cursors.Hand;
             togglePlayBtn.FlatAppearance.BorderColor = Color.DimGray;
             togglePlayBtn.FlatStyle = FlatStyle.Flat;
             togglePlayBtn.ForeColor = Color.WhiteSmoke;
@@ -89,6 +91,7 @@
             // 
             prevBtn.BackgroundImage = Properties.Resources.prev;
             prevBtn.BackgroundImageLayout = ImageLayout.Center;
+            prevBtn.Cursor = Cursors.Hand;
             prevBtn.FlatAppearance.BorderColor = Color.DimGray;
             prevBtn.FlatStyle = FlatStyle.Flat;
             prevBtn.ForeColor = Color.WhiteSmoke;
@@ -103,6 +106,7 @@
             // 
             nextBtn.BackgroundImage = Properties.Resources.next;
             nextBtn.BackgroundImageLayout = ImageLayout.Center;
+            nextBtn.Cursor = Cursors.Hand;
             nextBtn.FlatAppearance.BorderColor = Color.DimGray;
             nextBtn.FlatStyle = FlatStyle.Flat;
             nextBtn.ForeColor = Color.WhiteSmoke;
@@ -117,6 +121,7 @@
             // 
             likeBtn.BackgroundImage = Properties.Resources.musicLoveFix;
             likeBtn.BackgroundImageLayout = ImageLayout.Center;
+            likeBtn.Cursor = Cursors.Hand;
             likeBtn.FlatAppearance.BorderColor = Color.DimGray;
             likeBtn.FlatStyle = FlatStyle.Flat;
             likeBtn.ForeColor = Color.WhiteSmoke;

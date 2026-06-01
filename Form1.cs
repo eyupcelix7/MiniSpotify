@@ -38,7 +38,8 @@ namespace MiniSpotify
             ShowInTaskbar = false;
             likeBtn.BackgroundImage = Resources.music;
             _client = new HttpClient();
-            checkTogglePlayBtn();
+            CheckTogglePlayBtn();
+            SetTooltips();
             try
             {
                 var refreshToken = File.ReadAllText("D://C#/MiniSpotify/token.txt");
@@ -150,10 +151,10 @@ namespace MiniSpotify
         private async void togglePlayBtn_Click(object sender, EventArgs e)
         {
             _isPlaying = !_isPlaying;
-            checkTogglePlayBtn();
+            CheckTogglePlayBtn();
             await _mediaManager.TogglePlayPause();
         }
-        private void checkTogglePlayBtn()
+        private void CheckTogglePlayBtn()
         {
             if (_isPlaying)
                 togglePlayBtn.BackgroundImage = Resources.stop;
@@ -167,6 +168,18 @@ namespace MiniSpotify
         private async void nextBtn_Click(object sender, EventArgs e)
         {
             await _mediaManager.Next();
+        }
+        private void SetTooltips()
+        {
+            ToolTip toolTipLike = new ToolTip();
+            ToolTip toolTipPrev = new ToolTip();
+            ToolTip toolTipNext = new ToolTip();
+            ToolTip toolTipPlayToggle = new ToolTip();
+
+            toolTipLike.SetToolTip(likeBtn, "Beğen");
+            toolTipPrev.SetToolTip(prevBtn, "Önceki");
+            toolTipNext.SetToolTip(nextBtn, "Sonraki");
+            toolTipNext.SetToolTip(togglePlayBtn, "Durdur / Çal");
         }
     }
 }
