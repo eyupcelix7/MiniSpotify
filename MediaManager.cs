@@ -42,6 +42,8 @@ namespace MiniSpotify
             if(_currentSession != null)
             {
                 _currentSession.MediaPropertiesChanged += OnMediaPropertiesChanged;
+                _currentSession.PlaybackInfoChanged += OnPlaybackInfoChanged;
+
             }
             //var x = _currentSession.GetPlaybackInfo();
             //var dd = await _currentSession.TryGetMediaPropertiesAsync();
@@ -52,6 +54,13 @@ namespace MiniSpotify
         {
             await NotifyMediaChanged();
         }
+        private async void OnPlaybackInfoChanged(
+    GlobalSystemMediaTransportControlsSession sender,
+    PlaybackInfoChangedEventArgs args)
+        {
+            await NotifyMediaChanged();
+        }
+
         public async Task NotifyMediaChanged()
         {
             var session = _currentSession;
@@ -73,6 +82,7 @@ namespace MiniSpotify
         public async Task TogglePlayPause()
         {
             var session = _currentSession;
+            //await NotifyMediaChanged();
             await session.TryTogglePlayPauseAsync();
         }
         public async Task<bool> IsPlaying()
@@ -114,7 +124,13 @@ namespace MiniSpotify
         }
         public void Dispose()
         {
-            throw new NotImplementedException();
+            if (_disposed) return;
+            _disposed = true;
+
+            if (_currentSession != null)
+            {
+                _currentSession.MediaPropertiesChanged -= OnMediaPropertiesChanged;
+            }
         }
     }
 }

@@ -4,26 +4,54 @@ using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
 using System.Net.Http.Headers;
 using System.Reflection;
-
+using Timer = System.Windows.Forms.Timer;
 namespace MiniSpotify
 {
     public partial class Form1 : Form
     {
         private static EmbedIOAuthServer? _server;
         private static SpotifyClient? _spotify;
-
         private static string clientId = "35e3a33ec429452bb9bed1795addf566";
         private static string clientSecret = "8331fc3ebd7e45c48898c1b298e3a1c7";
-
         private string? accessToken;
         private AuthorizationCodeTokenResponse? token;
         private MediaManager _mediaManager;
         private HttpClient _client;
         private bool _isPlaying;
+        // --- Animasyon için ---
+        private double _opacity = 0;
+        private int _fadeStep;
+        private bool _fadingIn;
+        private bool _fadingOut;
+        private readonly Timer _fadeTimer;
+        private readonly Timer _displayTimer;
+        NotifyIcon _trayIcon;
         public Form1()
         {
             var syncContext = new WindowsFormsSynchronizationContext();
             SynchronizationContext.SetSynchronizationContext(syncContext);
+            Opacity = 0;
+            _fadeTimer = new System.Windows.Forms.Timer { Interval = 16 }; // 60fps
+            _fadeTimer.Tick += OnFadeTick;
+
+            _displayTimer = new System.Windows.Forms.Timer { Interval = 3000 };
+            _displayTimer.Tick += OnDisplayTimerTick;
+
+            // NotifyICon
+            _trayIcon = new NotifyIcon
+            {
+                Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location),
+                Text = "MiniSpotify",
+                Visible = true,
+                ContextMenuStrip = new ContextMenuStrip()
+            };
+            _trayIcon.ContextMenuStrip.Items.Add("Çıkış", null, (_, _) =>
+            {
+                _trayIcon.Visible = false;
+                ClearDisposes();
+                Application.Exit();
+            });
+
             this.CreateControl();
             InitializeComponent();
             Location = new Point(Screen.PrimaryScreen!.WorkingArea.Right - 390, 15);
@@ -34,6 +62,7 @@ namespace MiniSpotify
             _mediaManager.MediaChanged += OnMediaChanged;
             await _mediaManager.Start();
             _isPlaying = await _mediaManager.IsPlaying();
+            DoubleBuffered = true; // Titreşimi önlemek için
             TopMost = true;
             ShowInTaskbar = false;
             likeBtn.BackgroundImage = Resources.music;
@@ -75,16 +104,23 @@ namespace MiniSpotify
                 try
                 {
                     using var ms = new MemoryStream(info.ThumbnailBytes);
-                    var oldImage = pictureBox1.Image;
-                    pictureBox1.BackgroundImage = System.Drawing.Image.FromStream(ms);
+                    var oldImage = pctBoxImage.BackgroundImage;
+                    pctBoxImage.BackgroundImage = System.Drawing.Image.FromStream(ms);
                     oldImage?.Dispose();
                 }
-                catch { pictureBox1.Image = AlbumArtHelper.DefaultArt; }
+                catch { pctBoxImage.Image = AlbumArtHelper.DefaultArt; }
             }
             else
             {
-                pictureBox1.Image = AlbumArtHelper.DefaultArt;
+                pctBoxImage.Image = AlbumArtHelper.DefaultArt;
             }
+            if (info.Session.GetPlaybackInfo().PlaybackStatus == Windows.Media.Control.GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
+                _isPlaying = true;
+            else
+                _isPlaying = false;
+            
+            CheckTogglePlayBtn();
+            ShowPopup();
         }
         public static async Task NewLogin()
         {
@@ -154,7 +190,7 @@ namespace MiniSpotify
             CheckTogglePlayBtn();
             await _mediaManager.TogglePlayPause();
         }
-        private void CheckTogglePlayBtn()
+        public void CheckTogglePlayBtn()
         {
             if (_isPlaying)
                 togglePlayBtn.BackgroundImage = Resources.stop;
@@ -180,6 +216,86 @@ namespace MiniSpotify
             toolTipPrev.SetToolTip(prevBtn, "Önceki");
             toolTipNext.SetToolTip(nextBtn, "Sonraki");
             toolTipNext.SetToolTip(togglePlayBtn, "Durdur / Çal");
+        }
+        private void ShowPopup()
+        {
+            if (IsDisposed) return;
+
+            _displayTimer.Stop();
+            _fadeTimer.Stop();
+            _fadingIn = false;
+            _fadingOut = false;
+
+            if (!Visible)
+            {
+                Opacity = 0;
+                Location = new Point(Screen.PrimaryScreen!.WorkingArea.Right - 390, 15);
+                Show();
+                _opacity = 0;
+                _fadeStep = 0;
+                _fadingIn = true;
+                _fadeTimer.Start();
+            }
+            else
+            {
+                Opacity = 1;
+
+                _opacity = 1;
+                _fadeStep = 0;
+
+                _displayTimer.Start();
+            }
+        }
+        private void OnFadeTick(object? sender, EventArgs e)
+        {
+            if (_fadingIn)
+            {
+                _fadeStep += 16;
+                _opacity = Math.Min(1.0, (double)_fadeStep / 100);
+                Opacity = _opacity;
+                Location = new Point(
+                    (Screen.PrimaryScreen!.WorkingArea.Right - 390) - (int)(10 * _opacity),
+                    Location.Y
+                );
+                if (_fadeStep >= 100)
+                {
+                    _fadingIn = false;
+                    _fadeTimer.Stop();
+                    _displayTimer.Start(); // Görünme taömam, display süresini başlat
+                }
+            }
+            else if (_fadingOut)
+            {
+                _fadeStep += 16;
+                _opacity = Math.Max(0.0, 1.0 - (double)_fadeStep / 300);
+                Opacity = _opacity;
+
+                if (_fadeStep >= 300)
+                {
+                    _fadingOut = false;
+                    _fadeTimer.Stop();
+                    Hide();
+                }
+            }
+        }
+        private void OnDisplayTimerTick(object? sender, EventArgs e)
+        {
+            _displayTimer.Stop();
+            StartFadeOut();
+        }
+        private void StartFadeOut()
+        {
+            if (_fadingOut || !Visible) return;
+            _fadingOut = true;
+            _fadeStep = 0;
+            _fadeTimer.Start();
+        }
+        private void ClearDisposes()
+        {
+            _trayIcon?.Dispose();
+            _mediaManager.Dispose();
+            this.Close();
+            this.Dispose();
         }
     }
 }

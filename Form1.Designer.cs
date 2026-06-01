@@ -28,27 +28,27 @@
         /// </summary>
         private void InitializeComponent()
         {
-            pictureBox1 = new PictureBox();
+            pctBoxImage = new PictureBox();
             label1 = new Label();
             label2 = new Label();
             togglePlayBtn = new Button();
             prevBtn = new Button();
             nextBtn = new Button();
             likeBtn = new Button();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pctBoxImage).BeginInit();
             SuspendLayout();
             // 
-            // pictureBox1
+            // pctBoxImage
             // 
-            pictureBox1.BackgroundImage = Properties.Resources._0x1900_000000_80_0_0;
-            pictureBox1.BackgroundImageLayout = ImageLayout.Zoom;
-            pictureBox1.Cursor = Cursors.Hand;
-            pictureBox1.ImageLocation = "";
-            pictureBox1.Location = new Point(8, 9);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(55, 71);
-            pictureBox1.TabIndex = 0;
-            pictureBox1.TabStop = false;
+            pctBoxImage.BackgroundImage = Properties.Resources._0x1900_000000_80_0_0;
+            pctBoxImage.BackgroundImageLayout = ImageLayout.Zoom;
+            pctBoxImage.Cursor = Cursors.Hand;
+            pctBoxImage.ImageLocation = "";
+            pctBoxImage.Location = new Point(8, 9);
+            pctBoxImage.Name = "pctBoxImage";
+            pctBoxImage.Size = new Size(55, 71);
+            pctBoxImage.TabIndex = 0;
+            pctBoxImage.TabStop = false;
             // 
             // label1
             // 
@@ -142,7 +142,7 @@
             Controls.Add(likeBtn);
             Controls.Add(label2);
             Controls.Add(label1);
-            Controls.Add(pictureBox1);
+            Controls.Add(pctBoxImage);
             Controls.Add(nextBtn);
             Controls.Add(prevBtn);
             Controls.Add(togglePlayBtn);
@@ -152,14 +152,14 @@
             Text = "Form1";
             TopMost = true;
             Load += Form1_Load;
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pctBoxImage).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
 
-        private PictureBox pictureBox1;
+        private PictureBox pctBoxImage;
         private Label label1;
         private Label label2;
         private Button togglePlayBtn;
