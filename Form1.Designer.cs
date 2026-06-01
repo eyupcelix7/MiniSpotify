@@ -34,7 +34,7 @@
             button1 = new Button();
             button2 = new Button();
             button3 = new Button();
-            button4 = new Button();
+            likeBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
@@ -110,18 +110,19 @@
             button3.TabIndex = 5;
             button3.UseVisualStyleBackColor = true;
             // 
-            // button4
+            // likeBtn
             // 
-            button4.BackgroundImage = Properties.Resources.music;
-            button4.BackgroundImageLayout = ImageLayout.Center;
-            button4.FlatAppearance.BorderColor = Color.DimGray;
-            button4.FlatStyle = FlatStyle.Flat;
-            button4.ForeColor = Color.WhiteSmoke;
-            button4.Location = new Point(254, 50);
-            button4.Name = "button4";
-            button4.Size = new Size(30, 30);
-            button4.TabIndex = 6;
-            button4.UseVisualStyleBackColor = true;
+            likeBtn.BackgroundImage = Properties.Resources.musicLoveFix;
+            likeBtn.BackgroundImageLayout = ImageLayout.Center;
+            likeBtn.FlatAppearance.BorderColor = Color.DimGray;
+            likeBtn.FlatStyle = FlatStyle.Flat;
+            likeBtn.ForeColor = Color.WhiteSmoke;
+            likeBtn.Location = new Point(254, 50);
+            likeBtn.Name = "likeBtn";
+            likeBtn.Size = new Size(30, 30);
+            likeBtn.TabIndex = 6;
+            likeBtn.UseVisualStyleBackColor = true;
+            likeBtn.Click += likeBtn_Click;
             // 
             // Form1
             // 
@@ -130,7 +131,7 @@
             BackColor = SystemColors.Desktop;
             BackgroundImageLayout = ImageLayout.Zoom;
             ClientSize = new Size(390, 85);
-            Controls.Add(button4);
+            Controls.Add(likeBtn);
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(pictureBox1);
@@ -156,6 +157,6 @@
         private Button button1;
         private Button button2;
         private Button button3;
-        private Button button4;
+        private Button likeBtn;
     }
 }

@@ -1,30 +1,67 @@
+using MiniSpotify.Helper;
+using MiniSpotify.Properties;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
+using System.Net.Http.Headers;
 using System.Reflection;
 
 namespace MiniSpotify
 {
     public partial class Form1 : Form
     {
-        private static EmbedIOAuthServer _server;
-        private static SpotifyClient _spotify;
+        private static EmbedIOAuthServer? _server;
+        private static SpotifyClient? _spotify;
 
-        // BURAYA CLIENT ID YAZ
         private static string clientId = "35e3a33ec429452bb9bed1795addf566";
         private static string clientSecret = "8331fc3ebd7e45c48898c1b298e3a1c7";
 
-        private string accessToken;
-        private string refreshToken;
-        private AuthorizationCodeTokenResponse token;
-
+        private string? accessToken;
+        private string? refreshToken;
+        private AuthorizationCodeTokenResponse? token;
+        private MediaManager _mediaManager;
+        private HttpClient _client;
         public Form1()
         {
+            var syncContext = new WindowsFormsSynchronizationContext();
+            SynchronizationContext.SetSynchronizationContext(syncContext);
+            this.CreateControl();
             InitializeComponent();
-            Location = new Point(Screen.PrimaryScreen.WorkingArea.Right - 390, 15);
+            Location = new Point(Screen.PrimaryScreen!.WorkingArea.Right - 390, 15);
         }
-
+        private void OnMediaChanged(MediaInfo info)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(() => OnMediaChanged(info));
+                return;
+            }
+            label1.Text = info.Title;
+            label2.Text = info.Artist;
+            if (info.ThumbnailBytes != null)
+            {
+                try
+                {
+                    using var ms = new MemoryStream(info.ThumbnailBytes);
+                    var oldImage = pictureBox1.Image;
+                    pictureBox1.BackgroundImage = System.Drawing.Image.FromStream(ms);
+                    oldImage?.Dispose();
+                }
+                catch { pictureBox1.Image = AlbumArtHelper.DefaultArt; }
+            }
+            else
+            {
+                pictureBox1.Image = AlbumArtHelper.DefaultArt;
+            }
+        }
         private async void Form1_Load(object sender, EventArgs e)
         {
+            TopMost = true;
+            ShowInTaskbar = false;
+            likeBtn.BackgroundImage = Resources.music;
+            _client = new HttpClient();
+            _mediaManager = new MediaManager();
+            await _mediaManager.Start();
+            _mediaManager.MediaChanged += OnMediaChanged;
             try
             {
                 var refreshToken = File.ReadAllText("D://C#/MiniSpotify/token.txt");
@@ -36,13 +73,13 @@ namespace MiniSpotify
                         refreshToken
                     )
                 );
+                accessToken = newToken.AccessToken;
                 _spotify = new SpotifyClient(newToken.AccessToken);
                 var profile = await _spotify.UserProfile.Current();
-                MessageBox.Show(profile.DisplayName);
+                //MessageBox.Show(profile.DisplayName);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
                 await NewLogin();
             }
         }
@@ -60,7 +97,11 @@ namespace MiniSpotify
                     Scopes.UserModifyPlaybackState,
                     Scopes.UserReadPlaybackState,
                     Scopes.UserReadCurrentlyPlaying,
+                    Scopes.UserLibraryModify,
+                    Scopes.UserLibraryRead,
                     Scopes.AppRemoteControl,
+                    Scopes.PlaylistModifyPublic,
+                    Scopes.PlaylistReadPrivate,
                 }
             };
             BrowserUtil.Open(request.ToUri());
@@ -77,12 +118,32 @@ namespace MiniSpotify
             );
 
             _spotify = new SpotifyClient(tokenResponse.AccessToken);
-            await File.WriteAllTextAsync("token.txt", tokenResponse.RefreshToken);
+            await File.WriteAllTextAsync("D://C#/MiniSpotify/token.txt", tokenResponse.RefreshToken);
         }
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
             Win32.SetRoundedCorner(Handle);
+        }
+        private async void likeBtn_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var current = await _spotify!.Player.GetCurrentPlayback();
+                if (current?.Item is not FullTrack track)
+                    return;
+                _client = new HttpClient();
+                _client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", accessToken);
+                var uri = $"https://api.spotify.com/v1/me/library?uris=spotify:track:{track.Id}";
+                var response = await _client.PutAsync(uri, null);
+                var body = await response.Content.ReadAsStringAsync();
+                likeBtn.BackgroundImage = Resources.musicLoveFix;
+            }
+            catch (APIException ex)
+            {
+                MessageBox.Show(ex.Message + "\n" + ex.Response?.StatusCode);
+            }
         }
     }
 }
