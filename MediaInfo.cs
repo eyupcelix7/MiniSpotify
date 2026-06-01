@@ -8,7 +8,7 @@ namespace MiniSpotify
     public record MediaInfo(
         string Title,
         string Artist,
-        byte[] ThumbnailBytes,
+        byte[]? ThumbnailBytes, // Thumbnail yoksa null dönebilir
         string SourceAppUserModelId,
         GlobalSystemMediaTransportControlsSessionPlaybackStatus PlaybackStatus,
         GlobalSystemMediaTransportControlsSession? Session);

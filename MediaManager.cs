@@ -11,6 +11,9 @@ namespace MiniSpotify
         private GlobalSystemMediaTransportControlsSessionManager? _manager;
         private GlobalSystemMediaTransportControlsSession? _currentSession;
         private bool _started, _disposed;
+        private byte[]? _lastThumbnailBytes;
+        private string? _lastTitle;     
+        private string? _lastArtist;
         public event Action<MediaInfo>? MediaChanged;
 
         public async Task Start()
@@ -72,11 +75,26 @@ namespace MiniSpotify
             var playbackInfo = session.GetPlaybackInfo();
             var props = await session.TryGetMediaPropertiesAsync();
             if (props == null) return;
+            var title = props.Title ?? "Bulunamadı";
+            var artist = props.Artist ?? "Bulunamadı";
             var thumbnailBytes = await AlbumArtHelper.GetThumbnailBytesAsync(props.Thumbnail);
+            if (thumbnailBytes == null || thumbnailBytes.Length == 0)
+            {
+                if (_lastThumbnailBytes != null && _lastTitle == title && _lastArtist == artist) 
+                {
+                    thumbnailBytes = _lastThumbnailBytes;
+                }
+            }
+            else
+            {
+                _lastThumbnailBytes = thumbnailBytes; // Başarılı resmi önbelleğe alır
+                _lastTitle = title; // Son başlığı saklar
+                _lastArtist = artist; // Son sanatçıyı saklar
+            }
             var mediaInfo = new MediaInfo
             (
-                Title: props.Title ?? "Bulunamadı",
-                Artist: props.Artist ?? "Bulunamadı",
+                Title: title,
+                Artist: artist,
                 ThumbnailBytes: thumbnailBytes,
                 SourceAppUserModelId: session.SourceAppUserModelId,
                 PlaybackStatus: playbackInfo.PlaybackStatus,

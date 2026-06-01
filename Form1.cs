@@ -101,28 +101,25 @@ namespace MiniSpotify
             }
             label1.Text = info.Title;
             label2.Text = info.Artist;
-            if (info.ThumbnailBytes != null)
+            if (info.ThumbnailBytes != null && info.ThumbnailBytes.Length > 0)
             {
                 try
                 {
                     using var ms = new MemoryStream(info.ThumbnailBytes);
+                    using var temp = System.Drawing.Image.FromStream(ms); // Geçici görüntü oluşturur
                     var old = pctBoxImage.BackgroundImage;
 
-                    pctBoxImage.BackgroundImage =
-                        System.Drawing.Image.FromStream(ms);
+                    pctBoxImage.BackgroundImage = new Bitmap(temp); // Stream bağımlılığını koparır
 
                     old?.Dispose();
                 }
                 catch { pctBoxImage.Image = AlbumArtHelper.DefaultArt; }
             }
-            else
+            else if (pctBoxImage.BackgroundImage == null)
             {
-                pctBoxImage.Image = AlbumArtHelper.DefaultArt;
+                pctBoxImage.Image = AlbumArtHelper.DefaultArt; // Hiç görsel yoksa varsayılanı gösterir
             }
-            if (info.Session.GetPlaybackInfo().PlaybackStatus == Windows.Media.Control.GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
-                _isPlaying = true;
-            else
-                _isPlaying = false;
+            _isPlaying = info.PlaybackStatus == Windows.Media.Control.GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
             likeBtn.BackgroundImage = Resources.heartWhite;
             CheckTogglePlayBtn();
             ShowPopup();
